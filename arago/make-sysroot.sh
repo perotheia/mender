@@ -29,10 +29,13 @@ while read -r l; do
   sudo ln -sfn "$(realpath -m --relative-to="$(dirname "$l")" "$DIR$t")" "$l"
 done
 
-# Libraries that are NOT on the Arago image must be linked statically: hide
-# their .so dev links so only the .a can be found. Kept dynamic: libc family,
-# libssl/libcrypto (openssl 3), libdbus-1 -- all verified present on the TI
-# image (checked against TI tisdk-adas-image-j721e-evm 11.02.02.05 rootfs).
+# Everything except the base system libraries is linked statically, so the
+# binaries do not depend on which TI image variant (default/adas/edgeai) is on
+# the board: hide the .so dev links so only the .a can be found. lmdb is on no
+# Arago image; boost/zlib/xz/zstd are on the adas image but in other versions.
+# Kept dynamic: libc family, libssl/libcrypto (openssl 3), libdbus-1 -- present
+# on the TI rootfs tisdk-adas-image-j721e-evm 11.02.02.05 (libssl3 3.5.7,
+# libdbus-1-3 1.14.10, libc6 2.39).
 L="$DIR/usr/lib/aarch64-linux-gnu"
 for so in liblmdb.so libz.so liblzma.so libzstd.so "libboost_*.so"; do
   for f in $L/$so; do
